@@ -3,7 +3,7 @@
 set -e
 
 # MySQL raw entrypoint
-MYSQL_ENTRYPOINT="/docker-entrypoint.sh"
+MYSQL_ENTRYPOINT="/entrypoint.sh"
 
 # port
 LIVENESS_PORT=3306  # MySQL port

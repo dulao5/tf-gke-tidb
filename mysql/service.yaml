@@ -12,9 +12,9 @@ spec:
   - port: 3306
     targetPort: 3306
     name: mysql
-  - port: 10088
-    targetPort: 10088
-    name: readiness
+      #- port: 3306 #10088
+      #targetPort: 3306 #10088
+      #name: readiness
   ipFamilies:
   - IPv4
   ipFamilyPolicy: SingleStack

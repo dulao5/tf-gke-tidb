@@ -16,7 +16,9 @@ spec:
       terminationGracePeriodSeconds: 500
       containers:
       - name: mysql
-        image: asia-northeast1-docker.pkg.dev/${PROJECT_ID}/mysql-graceful-images/mysql:8.0
+        image: asia-northeast1-docker.pkg.dev/gcp-jp-tech-team/mysql-graceful-images/mysql:8.0
+        imagePullPolicy: Always
+          # command: ["/bin/sh", "-c", "sleep 3600"]
         ports:
         - containerPort: 3306
         - containerPort: 10088
