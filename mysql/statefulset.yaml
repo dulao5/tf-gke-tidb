@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+spec:
+  serviceName: "mysql"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      terminationGracePeriodSeconds: 90
+      containers:
+      - name: mysql
+        image: asia-east1/your-gcp-project-id/mysql8-graceful:v1
+        ports:
+        - containerPort: 3306
+        - containerPort: 10088
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "your-password"
+        livenessProbe:
+          tcpSocket:
+            port: 3306
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          tcpSocket:
+            port: 10088
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - name: mysql-data
+          mountPath: /var/lib/mysql
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: mysql-node
+                operator: In
+                values:
+                - "true"
+        podAntiAffinity:  # Pod should not be scheduled on the same node as other Pods with the same label
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app: mysql
+            topologyKey: "kubernetes.io/hostname"
+      tolerations:
+      - key: "mysql-node"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+  volumeClaimTemplates:
+  - metadata:
+      name: mysql-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 20Gi
+      storageClassName: "standard-rwo" # todo: change to your storage class

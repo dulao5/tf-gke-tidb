@@ -1,0 +1,60 @@
+clusterName: my-tidb
+timezone: UTC
+version: v8.5.1
+#tlsCluster:
+#  enabled: true
+
+pd:
+  replicas: 3
+  requests:
+    storage: "10Gi"
+  storageClassName: standard-rwo
+  nodeSelector:
+    role: pd
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/component
+                operator: In
+                values:
+                  - pd
+          topologyKey: topology.kubernetes.io/zone
+
+tikv:
+  replicas: 3
+  requests:
+    storage: "100Gi"
+  storageClassName: standard-rwo
+  nodeSelector:
+    role: tikv
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/component
+                operator: In
+                values:
+                  - tikv
+          topologyKey: topology.kubernetes.io/zone
+
+tidb:
+  replicas: 3
+  service:
+    type: ClusterIP
+    annotations:
+      networking.gke.io/load-balancer-type: "Internal"
+  nodeSelector:
+    role: tidb
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/component
+                operator: In
+                values:
+                  - tidb
+          topologyKey: topology.kubernetes.io/zone

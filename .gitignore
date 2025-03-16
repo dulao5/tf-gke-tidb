@@ -1,0 +1,13 @@
+# ignore terraform state files
+*.tfstate
+*.tfstate.backup
+*.tfstate.backup.*
+# ignore terraform plan output
+*.tfplan
+# ignore terraform logs
+terraform.log
+# ignore terraform tfvars
+*.auto.tfvars
+*.tfvars
+# ignore terraform plugin cache
+.terraform/
