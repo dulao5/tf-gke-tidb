@@ -23,9 +23,9 @@ function shutdown() {
         kill "$SOCAT_PID" || true
     fi
 
-    # 2. wait 60 s , drain connections
-    echo "Waiting 60 seconds before stopping MySQL..."
-    sleep 60
+    # 2. wait 90 s , drain connections
+    echo "Waiting 90 seconds before stopping MySQL..."
+    sleep 90
 
     # 3. close MySQL
     if [[ -n "$MYSQL_PID" ]]; then

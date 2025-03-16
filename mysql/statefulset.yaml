@@ -13,16 +13,22 @@ spec:
       labels:
         app: mysql
     spec:
-      terminationGracePeriodSeconds: 90
+      terminationGracePeriodSeconds: 500
       containers:
       - name: mysql
-        image: asia-east1/your-gcp-project-id/mysql8-graceful:v1
+        image: asia-northeast1-docker.pkg.dev/${PROJECT_ID}/mysql-graceful-images/mysql:8.0
         ports:
         - containerPort: 3306
         - containerPort: 10088
         env:
         - name: MYSQL_ROOT_PASSWORD
-          value: "your-password"
+          value: "NNU9bgtBy5wxcE2c"
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - sleep
+              - "360"
         livenessProbe:
           tcpSocket:
             port: 3306
@@ -30,9 +36,12 @@ spec:
           periodSeconds: 10
         readinessProbe:
           tcpSocket:
-            port: 10088
-          initialDelaySeconds: 5
-          periodSeconds: 5
+            port: 3306 # todo: change to 10088
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
         volumeMounts:
         - name: mysql-data
           mountPath: /var/lib/mysql
