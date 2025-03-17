@@ -54,6 +54,6 @@ error: 'Lost connection to MySQL server at 'handshake: reading initial communica
 
 after 90s
 ```
-Mon Mar 17 12:11:47 UTC 2025 Stopping TIDB (PID:11)...                                                                                                                                                                                            
+Mon Mar 17 12:11:47 UTC 2025 Stopping TIDB (PID:11)...
 [2025/03/17 12:11:47.606 +00:00] [INFO] [signal_posix.go:54] ["got signal to exit"] [signal=terminated]  
 ```
