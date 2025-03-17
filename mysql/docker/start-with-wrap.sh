@@ -13,28 +13,33 @@ READINESS_PORT=10088 # proxy port（use to Readiness）
 SOCAT_PID=""
 MYSQL_PID=""
 
+# graceful before wait time
+if test -z "$GRACEFUL_BEFORE_WAIT_TIME" ; then
+  export GRACEFUL_BEFORE_WAIT_TIME=15; 
+fi
+
 # graceful shutdown
 function shutdown() {
-    echo "Shutdown initiated..."
+	echo "$(date) Shutdown initiated..."
 
     # 1. close Readiness port proxy
     if [[ -n "$SOCAT_PID" ]]; then
-        echo "Stopping readiness probe (PID: $SOCAT_PID)..."
+        echo "$(date) Stopping readiness probe (PID: $SOCAT_PID)..."
         kill "$SOCAT_PID" || true
     fi
 
-    # 2. wait 90 s , drain connections
-    echo "Waiting 90 seconds before stopping MySQL..."
-    sleep 90
+    # 2. wait GRACEFUL_BEFORE_WAIT_TIME seconds , drain connections
+    echo "$(date) Waiting $GRACEFUL_BEFORE_WAIT_TIME seconds before stopping MySQL..."
+    sleep $GRACEFUL_BEFORE_WAIT_TIME
 
     # 3. close MySQL
     if [[ -n "$MYSQL_PID" ]]; then
-        echo "Stopping MySQL (PID: $MYSQL_PID)..."
+        echo "$(date) Stopping MySQL (PID: $MYSQL_PID)..."
         kill "$MYSQL_PID"
         wait "$MYSQL_PID"
     fi
 
-    echo "Shutdown complete."
+    echo "$(date) Shutdown complete."
     exit 0
 }
 
@@ -43,18 +48,18 @@ trap shutdown SIGTERM SIGINT
 
 # start Readiness proxy（10088 -> 3306）
 function start_readiness_probe() {
-    echo "Starting readiness probe on port $READINESS_PORT..."
-    socat TCP-LISTEN:$READINESS_PORT,fork,reuseaddr TCP:127.0.0.1:$LIVENESS_PORT &
+    echo "$(date) Starting readiness probe on port $READINESS_PORT..."
+    socat -x -v -d -d -lh -lu -ls -lpsocat TCP-LISTEN:$READINESS_PORT,fork,reuseaddr TCP:127.0.0.1:$LIVENESS_PORT &
     SOCAT_PID=$!
-    echo "Readiness probe started with PID $SOCAT_PID"
+    echo "$(date) Readiness probe started with PID $SOCAT_PID"
 }
 
 # start MySQL
 function start_mysql() {
-    echo "Starting MySQL..."
+    echo "$(date) Starting MySQL..."
     $MYSQL_ENTRYPOINT mysqld &
     MYSQL_PID=$!
-    echo "MySQL started with PID $MYSQL_PID"
+    echo "$(date) MySQL started with PID $MYSQL_PID"
 }
 
 # start services
