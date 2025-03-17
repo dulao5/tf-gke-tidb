@@ -25,12 +25,12 @@ spec:
         env:
         - name: MYSQL_ROOT_PASSWORD
           value: "NNU9bgtBy5wxcE2c"
-        lifecycle:
-          preStop:
-            exec:
-              command:
-              - sleep
-              - "360"
+        #lifecycle:
+        #  preStop:
+        #    exec:
+        #      command:
+        #      - sleep
+        #      - "360"
         livenessProbe:
           tcpSocket:
             port: 3306
