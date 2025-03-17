@@ -2,16 +2,19 @@
 
 set -m # Enable Job Control
 
-# MySQL raw entrypoint
-MYSQL_ENTRYPOINT="/entrypoint.sh"
+# TiDB raw entrypoint
+RAW_ENTRYPOINT="/usr/local/bin/tidb_start_script.sh"
+if test ! -f $RAW_ENTRYPOINT ; then
+  RAW_ENTRYPOINT="/tidb-server" # for local development
+fi
 
 # port
-LIVENESS_PORT=3306  # MySQL port
+LIVENESS_PORT=4000  # TiDB port
 READINESS_PORT=10088 # proxy port（use to Readiness）
 
 # process PID var
 SOCAT_PID=""
-MYSQL_PID=""
+TIDB_PID=""
 
 # graceful before wait time
 if test -z "$GRACEFUL_BEFORE_WAIT_TIME" ; then
@@ -29,14 +32,14 @@ function shutdown() {
     fi
 
     # 2. wait GRACEFUL_BEFORE_WAIT_TIME seconds , drain connections
-    echo "$(date) Waiting $GRACEFUL_BEFORE_WAIT_TIME seconds before stopping MySQL..."
+    echo "$(date) Waiting $GRACEFUL_BEFORE_WAIT_TIME seconds before stopping TIDB..."
     sleep $GRACEFUL_BEFORE_WAIT_TIME
 
-    # 3. close MySQL
-    if [[ -n "$MYSQL_PID" ]]; then
-        echo "$(date) Stopping MySQL (PID: $MYSQL_PID)..."
-        kill "$MYSQL_PID"
-        wait "$MYSQL_PID"
+    # 3. close TIDB
+    if [[ -n "$TIDB_PID" ]]; then
+        echo "$(date) Stopping TIDB (PID: $TIDB_PID)..."
+        kill "$TIDB_PID"
+        wait "$TIDB_PID"
     fi
 
     echo "$(date) Shutdown complete."
@@ -54,17 +57,17 @@ function start_readiness_probe() {
     echo "$(date) Readiness probe started with PID $SOCAT_PID"
 }
 
-# start MySQL
-function start_mysql() {
-    echo "$(date) Starting MySQL..."
-    $MYSQL_ENTRYPOINT mysqld &
-    MYSQL_PID=$!
-    echo "$(date) MySQL started with PID $MYSQL_PID"
+# start TIDB
+function start_tidb() {
+    echo "$(date) Starting TIDB..."
+    $RAW_ENTRYPOINT &
+    TIDB_PID=$!
+    echo "$(date) TIDB started with PID $TIDB_PID"
 }
 
 # start services
 start_readiness_probe
-start_mysql
+start_tidb
 
-# wait MySQL process
-wait "$MYSQL_PID"
+# wait TIDB process
+wait "$TIDB_PID"
