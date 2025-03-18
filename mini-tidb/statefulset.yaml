@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: tidb
+spec:
+  serviceName: "tidb"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: tidb
+  template:
+    metadata:
+      labels:
+        app: tidb
+    spec:
+      terminationGracePeriodSeconds: 500
+      containers:
+      - name: tidb
+        image: dulao5/graceful-tidb:v8.5.0 
+        imagePullPolicy: Always
+          # command: ["/bin/sh", "-c", "sleep 3600"]
+        ports:
+        - containerPort: 4000
+        - containerPort: 10088
+        env:
+        - name: GRACEFUL_BEFORE_WAIT_TIME
+          value: "90"
+        #lifecycle:
+        #  preStop:
+        #    exec:
+        #      command:
+        #      - sleep
+        #      - "360"
+        livenessProbe:
+          tcpSocket:
+            port: 4000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          tcpSocket:
+            port: 10088
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: tidb-node
+                operator: In
+                values:
+                - "true"
+        podAntiAffinity:  # Pod should not be scheduled on the same node as other Pods with the same label
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                app: tidb
+            topologyKey: "kubernetes.io/hostname"
+      tolerations:
+      - key: "tidb-node"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"

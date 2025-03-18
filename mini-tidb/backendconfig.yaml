@@ -1,0 +1,12 @@
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: tidb-backend-config
+spec:
+  healthCheck:
+    checkIntervalSec: 10
+    timeoutSec: 5
+    unhealthyThreshold: 3
+    healthyThreshold: 1
+    port: 10088
+    type: TCP
