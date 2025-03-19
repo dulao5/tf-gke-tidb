@@ -2,7 +2,7 @@ build
 ```
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
-  -t dulao5/graceful-tidb:v8.5.0 \
+  -t dulao5/graceful-tidb:v8.5.0-a001fcaa \
   -f Dockerfile . \
   --push
 
@@ -56,4 +56,13 @@ after 90s
 ```
 Mon Mar 17 12:11:47 UTC 2025 Stopping TIDB (PID:11)...
 [2025/03/17 12:11:47.606 +00:00] [INFO] [signal_posix.go:54] ["got signal to exit"] [signal=terminated]  
+```
+
+
+PS: for cloud scenario testing
+```
+$ docker run --rm -it -p4000:4000 -p10080:10080 -p10088:10088 \
+    -eGRACEFUL_BEFORE_WAIT_TIME=90 \
+    -v ./test/tidb_start_script.sh:/usr/local/bin/tidb_start_script.sh \
+    dulao5/graceful-tidb:v8.5.0 2>&1 | tee logs/tidb-local.log 
 ```

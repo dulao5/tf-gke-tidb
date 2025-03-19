@@ -6,6 +6,8 @@ set -m # Enable Job Control
 RAW_ENTRYPOINT="/usr/local/bin/tidb_start_script.sh"
 if test ! -f $RAW_ENTRYPOINT ; then
   RAW_ENTRYPOINT="/tidb-server" # for local development
+else
+  RAW_ENTRYPOINT="/bin/sh /usr/local/bin/tidb_start_script.sh"
 fi
 
 # port
